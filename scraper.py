@@ -14,9 +14,9 @@ urls = os.getenv("URLS").split(",")
 # scraper.py - Updated select_dropdown_options function
 @require_internet
 def select_dropdown_options(page):
-    print("Selecting dropdown options...")
+    print("Selecting years...")
 
-    # More flexible waiting
+    # waiting
     page.wait_for_selector("input[type='submit']", state="attached", timeout=60000)
     page.wait_for_timeout(10000)  # Base wait time
 
@@ -34,7 +34,7 @@ def select_dropdown_options(page):
         )
         page.wait_for_timeout(2000)  # Short pause between selections
 
-    # Year selection with more robust error handling
+    # Year selection with error handling
     year_selector = "#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_VariableSelectorValueSelectRepeater_ctl03_VariableValueSelect_VariableValueSelect_ValuesListBox"
     page.wait_for_selector(year_selector, state="attached", timeout=30000)
 
@@ -50,11 +50,11 @@ def select_dropdown_options(page):
                 year_selector,
                 f"el => {{ Array.from(el.options).slice(0, {slice_count}).forEach(option => option.selected = true); el.dispatchEvent(new Event('change')); }}",
             )
-            page.wait_for_timeout(5000)  # Longer wait for validation
+            page.wait_for_timeout(3000)  # Longer wait for validation
 
             if page.is_visible("#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_SelectionErrorlabel",
                                timeout=5000):
-                print("Selection limit reached, adjusting...")
+                print("Selection limit reached, adjusting to be fit <= 100,000 rows...")
                 page.eval_on_selector(
                     year_selector,
                     "el => { let options = Array.from(el.options).filter(option => option.selected); if (options.length > 0) { options[options.length - 1].selected = false; el.dispatchEvent(new Event('change')); } }",
