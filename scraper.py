@@ -121,6 +121,7 @@ def navigate_with_retries(page, url, max_retries=3, timeout=300000):
                 print(f"Failed to load URL after {max_retries} attempts. Skipping URL.")
                 return
 
+
 @require_internet
 def scrape_all():
     print("Internet available, starting...")
@@ -147,12 +148,17 @@ def scrape_all():
         browser.close()
 
     if all_cleaned_sheets:
+        # Create the directory if it doesn't exist
+        output_dir = "Agri-Price_Data_Files"
+        os.makedirs(output_dir, exist_ok=True)
+
         filename = f"Scraped_Agri-Prices_{timestamp}.xlsx"
-        with pd.ExcelWriter(filename, engine="xlsxwriter") as writer:
+        filepath = os.path.join(output_dir, filename)
+        with pd.ExcelWriter(filepath, engine="xlsxwriter") as writer:
             for sheet, data in all_cleaned_sheets.items():
                 data.to_excel(writer, sheet_name=sheet, index=False)
 
-        print(f"✅ Final Excel file saved: {filename}")
+        print(f"✅ Final Excel file saved to {filepath}")
         store_data_in_mysql(all_cleaned_sheets)
     else:
         print("❌ No data was scraped!")
