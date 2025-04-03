@@ -11,7 +11,7 @@ load_dotenv()
 urls = os.getenv("URLS").split(",")
 
 
-# scraper.py - Updated select_dropdown_options function
+# scraper.py - Updated select_dropdown_options function (Years)
 @require_internet
 def select_dropdown_options(page):
     print("Selecting years...")
@@ -36,12 +36,17 @@ def select_dropdown_options(page):
 
     # Year selection with error handling
     year_selector = "#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_VariableSelectorValueSelectRepeater_ctl03_VariableValueSelect_VariableValueSelect_ValuesListBox"
+    # Get all options inside the select listbox
+    options = page.locator(f"{year_selector} option").all_inner_texts()
+
+    # Join them with a comma
+    options_text = ", ".join(options)
     page.wait_for_selector(year_selector, state="attached", timeout=30000)
 
     total_years = page.eval_on_selector(year_selector, "el => el.options.length")
-    print(f"Total available years: {total_years}")
+    print(f"Total available years: {total_years}: {options_text}")
 
-    slice_count = min(2, total_years)  # Start with 2 or total available if less
+    slice_count = min(1, total_years)  # Start with 1 or total available if less
 
     while slice_count <= total_years:
         print(f"Selecting {slice_count} years...")
@@ -91,9 +96,10 @@ def select_dropdown_options(page):
                 if attempt == 2:
                     raise
                 print(f"Submit failed (attempt {attempt + 1}), retrying...")
-                page.wait_for_timeout(10000)
+                page.reload()
     else:
         raise Exception("Submit button NOT found after extended waiting!")
+
 
 def navigate_with_retries(page, url, max_retries=3, timeout=300000):
     """Navigate to a URL with retries and flexible timeout."""

@@ -27,7 +27,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
     try:
         for attempt in range(MAX_SUBMIT_RETRIES):
             try:
-                print(f"⚡️ Attempt {attempt + 1}/{MAX_SUBMIT_RETRIES} to submit and download...")
+                print(f"Attempt {attempt + 1}/{MAX_SUBMIT_RETRIES} to submit and download...")
 
                 with page.expect_download(timeout=TOTAL_TIMEOUT) as download_info:
                     # Enhanced click with timeout and verification
