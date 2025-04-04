@@ -10,7 +10,7 @@ from datetime import datetime
 
 load_dotenv()
 
-# Get URLs from .env file
+# Get URL(s) from .env file
 urls = os.getenv("URLS").split(",")
 
 
