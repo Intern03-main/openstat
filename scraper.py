@@ -1,9 +1,12 @@
 from playwright.sync_api import sync_playwright
 from utils import require_internet
 from processing import download_and_process_excel
+from database import store_data_in_mysql
 import os
 from dotenv import load_dotenv
 import time
+import pandas as pd
+from datetime import datetime
 
 load_dotenv()
 
@@ -96,7 +99,7 @@ def select_dropdown_options(page):
                 if attempt == 2:
                     raise
                 print(f"Submit failed (attempt {attempt + 1}), retrying...")
-                page.reload()
+                page.reload(wait_until="loadF")
     else:
         raise Exception("Submit button NOT found after extended waiting!")
 
@@ -124,17 +127,14 @@ def navigate_with_retries(page, url, max_retries=3, timeout=300000):
 
 @require_internet
 def scrape_all():
+    all_data_frames = []
     print("Internet available, starting...")
-    from database import store_data_in_mysql
-    from datetime import datetime
-    import pandas as pd
 
     timestamp = datetime.now().strftime("%B%d,%Y_%H-%M-%S")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
-        all_cleaned_sheets = {}
 
         for index, url in enumerate(urls):
             print(f"\nNavigating to URL {index + 1}/{len(urls)}: {url}")
@@ -143,22 +143,26 @@ def scrape_all():
             select_dropdown_options(page)
 
             cleaned_data = download_and_process_excel(page, index, timestamp, urls)
-            all_cleaned_sheets.update(cleaned_data)
+            if not cleaned_data.empty:
+                all_data_frames.append(cleaned_data)
 
         browser.close()
 
-    if all_cleaned_sheets:
-        # Create the directory if it doesn't exist
+    if all_data_frames:
+        # Combine all data into one DataFrame
+        final_df = pd.concat(all_data_frames, ignore_index=True)
+
+        # Save to CSV
         output_dir = "Agri-Price_Data_Files"
         os.makedirs(output_dir, exist_ok=True)
+        csv_filename = f"Scraped_Agri-Prices_{timestamp}.csv"
+        csv_filepath = os.path.join(output_dir, csv_filename)
 
-        filename = f"Scraped_Agri-Prices_{timestamp}.xlsx"
-        filepath = os.path.join(output_dir, filename)
-        with pd.ExcelWriter(filepath, engine="xlsxwriter") as writer:
-            for sheet, data in all_cleaned_sheets.items():
-                data.to_excel(writer, sheet_name=sheet, index=False)
+        final_df.to_csv(csv_filepath, index=False)
+        print(f"Data saved to CSV file: {csv_filepath}")
 
-        print(f"✅ Final Excel file saved to {filepath}")
-        store_data_in_mysql(all_cleaned_sheets)
+        # Store data in MySQL
+        store_data_in_mysql(final_df)
     else:
-        print("❌ No data was scraped!")
+        print("No data was scraped!")
+

@@ -45,14 +45,14 @@ def download_and_process_excel(page, url_index, timestamp, urls):
                 if not os.path.exists(download_path):
                     raise Exception("Download file not found after waiting")
 
-                print("✅ File downloaded successfully!")
+                print("File downloaded successfully!")
                 break  # Exit retry loop if successful
 
             except Exception as e:
-                print(f"⚠️ Attempt {attempt + 1} failed: {str(e)}")
+                print(f"Attempt {attempt + 1} failed: {str(e)}")
                 if attempt == MAX_SUBMIT_RETRIES - 1:
                     # Final attempt failed, capture diagnostics
-                    print("❌ Failed to submit after multiple attempts. Capturing diagnostics...")
+                    print("Failed to submit after multiple attempts. Capturing diagnostics...")
                     page.screenshot(path=f"screenshots/failure_url_{url_index + 1}.png")
                     with open(f"error_logs/url_{url_index + 1}.html", "w", encoding="utf-8") as f:
                         f.write(page.content())
@@ -60,7 +60,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
 
                 # Wait before retrying with increasing delay
                 retry_delay = (attempt + 1) * 5000  # 5, 10, 15 seconds
-                print(f"🔄 Retrying in {retry_delay / 1000} seconds...")
+                print(f"Retrying in {retry_delay / 1000} seconds...")
                 page.wait_for_timeout(retry_delay)
 
         # Proceed with reading and processing Excel content
@@ -69,7 +69,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
             file_stream.write(f.read())
         file_stream.seek(0)
 
-        print("📄 Reading and cleaning Excel content...")
+        print("...Reading and cleaning Excel content...")
         df = pd.read_excel(file_stream, sheet_name=None, header=None)
         cleaned_sheets = {}
 
@@ -79,21 +79,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
             if data is None or data.empty:
                 continue
 
-            # SHEET-NAME with enhanced error handling
-            def get_short_name_from_page(page):
-                try:
-                    title_text = page.text_content(
-                        "span.hierarchical_tableinformation_title",
-                        timeout=10000  # Added timeout
-                    ).strip()
-                    short_name = title_text.split(":")[0]  # Extract first word before colon
-                    return short_name[:10]  # Limit to 10 characters
-                except Exception as e:
-                    print(f"Could not extract short name: {e}")
-                    return f"Unknown_{url_index}"  # More descriptive fallback
-
-            short_name = get_short_name_from_page(page)
-            new_sheet_name = f"{short_name}_{url_index + 1}"
+            all_data = []
 
             # COMMODITY-NAME with enhanced error handling
             def get_commodity_type_from_page(page):
@@ -103,10 +89,10 @@ def download_and_process_excel(page, url_index, timestamp, urls):
                         timeout=10000  # Added timeout
                     ).strip()
                     commodity_type = title_text.split(":")[0]
-                    return commodity_type[:18]  # Limit to 18 characters
+                    return commodity_type[:20]  # Limit to 20 characters
                 except Exception as e:
-                    print(f"⚠️ Could not extract commodity name: {e}")
-                    return f"Commodity_{url_index}"  # More descriptive fallback
+                    print(f"Could not extract commodity name: {e}!")
+                    return f"Commodity_{url_index}"
 
             commodity_type = get_commodity_type_from_page(page)
 
@@ -222,7 +208,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
                     group.loc[:, "Price"] = imputer.fit_transform(group[["Price"]])
                     group.loc[:, "Price"] = group["Price"].round(2)
                 except Exception as e:
-                    print(f"⚠️ Imputation failed for {group['Commodity'].iloc[0]}: {e}")
+                    print(f"Imputation failed for {group['Commodity'].iloc[0]}: {e}!")
                 return group
 
             data_long = (
@@ -233,10 +219,13 @@ def download_and_process_excel(page, url_index, timestamp, urls):
                 .reset_index(drop=True)
             )
 
-            cleaned_sheets[new_sheet_name] = data_long
+            all_data.append(data_long)
             print(f"Processed data from URL {url_index + 1}, sheet {sheet}")
 
-        return cleaned_sheets
+        if all_data:
+            combined_df = pd.concat(all_data, ignore_index=True)
+            return combined_df
+        return pd.DataFrame()
 
     except Exception as e:
         print(f"Critical error processing URL {url_index + 1}: {str(e)}")
