@@ -21,7 +21,7 @@ def select_dropdown_options(page):
 
     # waiting
     page.wait_for_selector("input[type='submit']", state="attached", timeout=60000)
-    page.wait_for_timeout(10000)  # Base wait time
+    page.wait_for_timeout(10000)
 
     selectors = [
         "#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_VariableSelectorValueSelectRepeater_ctl01_VariableValueSelect_VariableValueSelect_ValuesListBox",
@@ -35,19 +35,18 @@ def select_dropdown_options(page):
             selector,
             "el => { Array.from(el.options).forEach(option => option.selected = true); el.dispatchEvent(new Event('change')); }",
         )
-        page.wait_for_timeout(2000)  # Short pause between selections
+        page.wait_for_timeout(1500)  # Short pause between selections
 
     # Year selection with error handling
     year_selector = "#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_VariableSelectorValueSelectRepeater_ctl03_VariableValueSelect_VariableValueSelect_ValuesListBox"
     # Get all options inside the select listbox
     options = page.locator(f"{year_selector} option").all_inner_texts()
 
-    # Join them with a comma
     options_text = ", ".join(options)
     page.wait_for_selector(year_selector, state="attached", timeout=30000)
 
     total_years = page.eval_on_selector(year_selector, "el => el.options.length")
-    print(f"Total available years: {total_years}: {options_text}")
+    print(f"Total available years: {total_years}: {options_text}.")
 
     slice_count = min(1, total_years)  # Start with 1 or total available if less
 
@@ -73,7 +72,7 @@ def select_dropdown_options(page):
             print(f"Error during year selection: {e}")
             break
 
-    # Format selection with retries
+    # Format selection
     format_selector = "select#ctl00_ContentPlaceHolderMain_VariableSelector1_VariableSelector1_OutputFormats_OutputFormats_OutputFormatDropDownList"
     for attempt in range(3):
         try:
@@ -85,10 +84,10 @@ def select_dropdown_options(page):
             print(f"Format selection failed (attempt {attempt + 1}), retrying...")
             page.wait_for_timeout(3000)
 
-    # More robust submit button handling
+    # Submit button handling
     submit_button = page.wait_for_selector("input[type='submit']", state="attached", timeout=120000)
     if submit_button:
-        print("Submit button found, clicking with retries...")
+        print("Submit button found, clicking...")
         for attempt in range(3):
             try:
                 submit_button.click(timeout=60000)
@@ -99,7 +98,7 @@ def select_dropdown_options(page):
                 if attempt == 2:
                     raise
                 print(f"Submit failed (attempt {attempt + 1}), retrying...")
-                page.reload(wait_until="loadF")
+                page.reload(wait_until="domcontentloaded")
     else:
         raise Exception("Submit button NOT found after extended waiting!")
 
@@ -152,8 +151,8 @@ def scrape_all():
         # Combine all data into one DataFrame
         final_df = pd.concat(all_data_frames, ignore_index=True)
 
-        # Save to CSV
-        output_dir = "Agri-Price_Data_Files"
+        # Save to a CSV file
+        output_dir = os.path.join(os.path.expanduser("~"), "Desktop", "Agri-Price-Data_Files")
         os.makedirs(output_dir, exist_ok=True)
         csv_filename = f"Scraped_Agri-Prices_{timestamp}.csv"
         csv_filepath = os.path.join(output_dir, csv_filename)
@@ -161,7 +160,7 @@ def scrape_all():
         final_df.to_csv(csv_filepath, index=False)
         print(f"Data saved to CSV file: {csv_filepath}")
 
-        # Store data in MySQL
+        # Store data in Database
         store_data_in_mysql(final_df)
     else:
         print("No data was scraped!")

@@ -48,6 +48,7 @@ def wait_for_internet(retry_interval=5):
 
 def require_internet(func):
     """Decorator to check internet before running a function."""
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # Wait until internet connection is restored before proceeding

@@ -45,7 +45,7 @@ def download_and_process_excel(page, url_index, timestamp, urls):
                 if not os.path.exists(download_path):
                     raise Exception("Download file not found after waiting")
 
-                print("File downloaded successfully!")
+                print("File downloaded successfully!, analyzing file...")
                 break  # Exit retry loop if successful
 
             except Exception as e:
@@ -71,7 +71,6 @@ def download_and_process_excel(page, url_index, timestamp, urls):
 
         print("...Reading and cleaning Excel content...")
         df = pd.read_excel(file_stream, sheet_name=None, header=None)
-        cleaned_sheets = {}
 
         unwanted_texts = os.getenv("UNWANTED_TEXTS").split(",")
 
