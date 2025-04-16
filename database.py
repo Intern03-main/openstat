@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# Make sure to have a ready database named "scraped_data"
 def store_data_in_mysql(data_long, batch_size=1000):
     connection = mysql.connector.connect(
         host=os.getenv("MYSQL_HOST"),
@@ -17,7 +18,7 @@ def store_data_in_mysql(data_long, batch_size=1000):
     )
     cursor = connection.cursor()
 
-    # Drop and recreate the table
+    # Drop if exsits and recreate the table
     cursor.execute("DROP TABLE IF EXISTS price_data;")
     create_table_query = """
     CREATE TABLE price_data (
