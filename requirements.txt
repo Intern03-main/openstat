@@ -18,3 +18,4 @@ mysqlclient
 scikit-learn
 python-dotenv
 openpyxl
+rich

@@ -2,6 +2,22 @@ import functools
 import socket
 import requests
 import time
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
+
+def wait_for_selector_with_retry(page, selector, timeout=30000, retry_interval=5):
+    """Retries waiting for a selector with automatic internet checking and infinite wait."""
+    while True:
+        try:
+            return page.wait_for_selector(selector, timeout=timeout)
+        except PlaywrightTimeoutError:
+            print(f"Timeout waiting for selector: {selector}")
+            if not is_internet_available():
+                print("Internet lost. Waiting to reconnect before retrying selector...")
+                wait_for_internet()
+            else:
+                print(f"Selector not found. Retrying in {retry_interval} seconds...")
+                time.sleep(retry_interval)
 
 
 def is_internet_available(retries=3, initial_timeout=3, max_timeout=15):
