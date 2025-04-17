@@ -41,9 +41,9 @@ This dataset contains scraped and processed agricultural commodity price data fr
 
 | Geolocation | Commodity | Price | Commodity Type   | Year    | Period   |
 |-------------|-----------|-------|------------------|---------|----------|
-| Region A    | Avocado   | 300   | Fruits           | 2023    | January  |
-| Region B    | Beans     | 50.75 | Beans and Legumes| 2024    | February |
-| Region C    | Corn      | 150   | Cereals          | 2025    | Annual   |
+| Abra        | Avocado   | 300   | Fruits           | 2023    | January  |
+| Apayao      | Beans     | 50.75 | Beans and Legumes| 2024    | February |
+| Benguet     | Corn      | 150   | Cereals          | 2025    | Annual   |
 
 ---
 
