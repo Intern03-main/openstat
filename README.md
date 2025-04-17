@@ -1,7 +1,8 @@
-#  Scraped Agricultural Prices – README Metadata
+#  Scraped Agricultural Prices
+---
 
 **Dataset Description:**  
-This dataset contains scraped and processed agricultural commodity price data from government websites. The data is gathered per region, commodity type, and time period, and saved in a cleaned, structured CSV file.
+This dataset contains scraped and processed agricultural commodity price data from PSA's website (OpenSTAT). The data is gathered per region, commodity type, and period (month or annual), and saved in a cleaned, structured CSV file.
 
 ---
 
