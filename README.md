@@ -39,7 +39,7 @@ This dataset contains scraped and processed agricultural commodity price data fr
 
 ##  Example Data Preview:
 
-| Geolocation | Commodity | Price | Commodity Type     Year    | Period   |
+| Geolocation | Commodity | Price | Commodity Type   | Year    | Period   |
 |-------------|-----------|-------|------------------|---------|----------|
 | Region A    | Avocado   | 300   | Fruits           | 2023    | January  |
 | Region B    | Beans     | 50.75 | Beans and Legumes| 2024    | February |
