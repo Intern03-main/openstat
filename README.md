@@ -1,36 +1,55 @@
-## Playwright web-scraper that scrapes OpenSTAT of PSA's records on Wholesale Selling Prices of Agricultural Commodities.
-# Agri-Price Scraper
+#  Scraped Agricultural Prices – README Metadata
 
-## Project Description:
-This scraper collects agricultural price data from multiple sources for various commodities. It processes the data and stores it in a clean, structured format suitable for analysis. The scraper extracts data by navigating dropdowns for different years and selecting the relevant commodity and price information.
+**Dataset Description:**  
+This dataset contains scraped and processed agricultural commodity price data from government websites. The data is gathered per region, commodity type, and time period, and saved in a cleaned, structured CSV file.
 
-## Columns in Scraped Data:
+---
 
-1. **Geolocation**: 
-   - Description: The geographical location (e.g., city or region) where the commodity price is recorded.
-   - Example: "Laguna", "Cebu"
+##  Columns:
 
-2. **Commodity**: 
-   - Description: The type of commodity (e.g., rice, corn).
-   - Example: "Rice", "Corn"
+| Column Name       | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `Geolocation`     | The region or province where the data was collected.                       |
+| `Commodity`       | The specific agricultural product (e.g., "Tomato", "Rice").                |
+| `Commodity Type`  | The category of the commodity (e.g., "Vegetables", "Cereals").             |
+| `Year`            | The year corresponding to the price value.                                 |
+| `Period`          | The month or time period within the year (e.g., "January", "Annual").      |
+| `Price`           | The average price of the commodity for the given region and time period.   |
 
-3. **Commodity Type**: 
-   - Description: The classification or category of the commodity (e.g., grains, vegetables).
-   - Example: "Grains", "Fruits"
+---
 
-4. **Year**:
-   - Description: The year the price data is recorded.
-   - Example: 2023, 2024
+##  Cleaning Process:
 
-5. **Period**: 
-   - Description: The time period within the year (e.g., month or quarter) when the data is recorded.
-   - Example: "January", "Q1", "August"
+- Dropped all rows and columns that are entirely empty (`NaN`).
+- Removed rows containing user-defined unwanted patterns from the `.env` file (see `UNWANTED_TEXTS`).
 
-6. **Price**:
-   - Description: The price of the commodity for the corresponding period and geolocation.
-   - Example: 45.00, 55.75 (in local currency)
+---
 
-## How to Run the Scraper:
-1. Install required dependencies:
-   ```bash
-   pip install -r requirements.txt
+##  Imputation Process:
+
+- For commodities with missing price data:
+  - We **group by each commodity**.
+  - If the group contains at least one valid price, we use **mean imputation** to fill in the missing values (`NaN`) in the `Price` column.
+  - This is done using `SimpleImputer(strategy='mean')` from `sklearn.impute`.
+  - Prices are rounded to 2 decimal places after imputation.
+
+>  If a commodity group contains **no historical data (i.e., all values missing)**, we skip imputation for that group.
+
+---
+
+##  Example Data Preview:
+
+| Geolocation | Commodity | Price | Commodity Type     Year    | Period   |
+|-------------|-----------|-------|------------------|---------|----------|
+| Region A    | Avocado   | 300   | Fruits           | 2023    | January  |
+| Region B    | Beans     | 50.75 | Beans and Legumes| 2024    | February |
+| Region C    | Corn      | 150   | Cereals          | 2025    | Annual   |
+
+---
+
+##  File Output:
+
+- The cleaned data is saved as:  
+  **`Scraped_Agri-Prices_<timestamp>.csv`**  
+  Located in:  
+  **Desktop/Agri-Price-Data_Files/**
