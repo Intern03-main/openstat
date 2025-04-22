@@ -19,6 +19,22 @@ This dataset contains scraped and processed agricultural commodity price data fr
 
 ---
 
+## Setup & Usage
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+playwright install
+```
+2. Make sure that the .env file contents match the MySQL database credentials you're using.
+   
+3. Run the scraper:
+```bash
+python main.py
+```
+
+---
+
 ##  Cleaning Process:
 
 - Dropped all rows and columns that are entirely empty (`NaN`).
