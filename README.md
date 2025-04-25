@@ -22,7 +22,7 @@ This dataset contains scraped and processed agricultural commodity price data fr
 ## Setup & Usage
 
 1. Install dependencies:
-```py
+```bash
 pip install -r requirements.txt
 playwright install
 ```
