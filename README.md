@@ -66,7 +66,7 @@ python main.py
 
 ##  File Output:
 
-- The cleaned data is saved as separate .csv files, such as:  
+- The cleaned data is saved as separate .csv files by Commodity, such as:  
   **`CommodityName_<timestamp>.csv`**  
   Located in:  
   **Desktop/Agri-Price-Data_Files/**
