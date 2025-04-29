@@ -66,7 +66,12 @@ python main.py
 
 ##  File Output:
 
-- The cleaned data is saved as:  
-  **`Scraped_Agri-Prices_<timestamp>.csv`**  
+- The cleaned data is saved as separate .csv files, such as:  
+  **`CommodityName_<timestamp>.csv`**  
   Located in:  
   **Desktop/Agri-Price-Data_Files/**
+
+## Sample Output:
+```bash
+https://drive.google.com/drive/folders/1045QAvn_T2qw-3X7yhtp44bD0QPcu6J_?usp=sharing
+```
