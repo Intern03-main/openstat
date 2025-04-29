@@ -14,6 +14,7 @@ console = Console()
 load_dotenv()
 urls = os.getenv("URLS").split(",")
 
+timestamp = datetime.now().strftime("%B%d,%Y_%H-%M-%S")
 
 @require_internet
 def select_dropdown_options(page, year_indexes, finalize=False):
@@ -68,8 +69,7 @@ def select_dropdown_options(page, year_indexes, finalize=False):
 @require_internet
 def scrape_all():
     all_data_frames = []
-    console.rule("[bold cyan]Agri-Price Scraper Started")
-    timestamp = datetime.now().strftime("%B%d,%Y_%H-%M-%S")
+    console.rule(f"[bold cyan]Agri-Price Scraper Started at {timestamp}")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -128,10 +128,10 @@ def scrape_all():
                         all_data_frames.append(cleaned_data)
                         console.print(f"[green]✔ Processed batch:[/green] {current_batch}")
                     else:
-                        console.print("[yellow]⚠ No data returned[/yellow]")
+                        console.print("[yellow]No data returned[/yellow]")
 
                 except Exception as e:
-                    console.print(f"[red]❌ Submission error:[/red] {e}")
+                    console.print(f"[red] Submission error:[/red] {e}")
 
                 remaining_years = [y for y in remaining_years if y not in current_batch]
 
@@ -141,11 +141,16 @@ def scrape_all():
         final_df = pd.concat(all_data_frames, ignore_index=True)
         output_dir = os.path.join(os.path.expanduser("~"), "Desktop", "Agri-Price-Data_Files")
         os.makedirs(output_dir, exist_ok=True)
-        csv_filename = f"Scraped_Agri-Prices_{timestamp}.csv"
-        csv_path = os.path.join(output_dir, csv_filename)
 
-        final_df.to_csv(csv_path, index=False)
-        console.print(f"\n[bold green]✔ Data saved to:[/bold green] {csv_path}")
+        # Save per commodity instead of a single file
+        commodities = final_df['Commodity'].unique()
+        for commodity in commodities:
+            commodity_df = final_df[final_df['Commodity'] == commodity].copy()
+            # commodity_df.drop(columns=['Commodity'], inplace=True)  # optional
+            safe_name = commodity.replace(" ", "_").replace("/", "-")
+            commodity_file = os.path.join(output_dir, f"{safe_name}_{timestamp}.csv")
+            commodity_df.to_csv(commodity_file, index=False)
+            console.print(f"[bold green]✔ Saved:[/bold green] {commodity_file}")
 
         store_data_in_mysql(final_df)
     else:
@@ -170,7 +175,7 @@ def navigate_with_retries(page, url, timeout=30000):
             if "ERR_NAME_NOT_RESOLVED" in str(e) or "ERR_NETWORK_CHANGED" in str(e) or "net::ERR_INTERNET_DISCONNECTED" in str(e):
                 print("⚠ Internet lost. Waiting to reconnect...")
                 wait_for_internet()
-                print("🌐 Internet reconnected. Reloading the page and retrying...")
+                print("Internet reconnected. Reloading the page and retrying...")
                 try:
                     page.reload(timeout=timeout)
                     page.wait_for_load_state("networkidle", timeout=60000)
