@@ -23,7 +23,7 @@ def store_data_in_mysql(data_long, batch_size=1000):
     create_table_query = """
     CREATE TABLE price_data (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        geolocation VARCHAR(50),
+        geolocation VARCHAR(70),
         commodity VARCHAR(70),
         price VARCHAR(50),
         year INT,
